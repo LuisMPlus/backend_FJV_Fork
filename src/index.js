@@ -14,6 +14,7 @@ require("dotenv").config();
 const { sequelize, connectDB } = require("./config/database");
 const passport = require("./config/passport");
 const { defineAssociations } = require("./models/associations");
+const { defineRBACAssociations } = require("./RBAC/models/Associations");
 const corsOptions = require("./config/cors");
 
 // --- Inicialización de Express ---
@@ -102,6 +103,9 @@ app.use("/api/work-areas", require("./routes/work-areas.routes"));
 // Rutas para momentos destacados
 app.use("/api/momentos-destacados", require("./routes/momentos-destacados.routes"));
 
+// Rutas para sistema RBAC
+app.use("/api/rbac", require("./RBAC/routes/rbac.routes.js"));
+
 // === RUTAS DE WEBHOOKS MERCADOPAGO ===
 // MercadoPago puede enviar webhooks a diferentes rutas, vamos a capturarlas todas
 
@@ -156,6 +160,8 @@ async function startServer() {
 
     // 2. Definir asociaciones entre modelos
     defineAssociations();
+    defineRBACAssociations();
+    console.log("✔ Asociaciones entre modelos definidas correctamente.");
 
     // 3. Sincronizar modelos con la base de datos
     await sequelize.sync({ alter: false });

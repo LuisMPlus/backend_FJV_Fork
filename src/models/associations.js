@@ -298,5 +298,5 @@ module.exports = {
   WorkAreasConfig,
   WorkArea,
   MomentosDestacadosConfig,
-  MomentosDestacadosImage
+  MomentosDestacadosImage,
 };
