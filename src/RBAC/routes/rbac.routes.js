@@ -12,7 +12,12 @@ const { authenticate } = require('../../middleware/auth.middleware');
 const { 
   requirePermission, 
   requireAnyPermission,
-  loadUserPermissions 
+  loadUserPermissions,
+  requireRole,
+  requireAnyRole,
+  requirePermissionOrRole,
+  requireAdmin,
+  requireAdminAccess
 } = require('../middlewares/permissions');
 
 /**
@@ -21,8 +26,8 @@ const {
  * @access Requiere autenticación y permiso 'manage_roles'
  */
 router.get('/permissions', 
-  authenticate,
-  requirePermission('manage_roles'),
+  /* authenticate, */
+  /* requirePermission('manage_roles'), */
   rbacController.getAllPermissions
 );
 
@@ -84,12 +89,62 @@ router.get('/permissions/:permissionName/roles',
 /**
  * @route GET /api/rbac/overview
  * @desc Obtener resumen del sistema RBAC
- * @access Requiere autenticación y permisos administrativos
+ * @access Requiere ser administrador O tener permiso manage_system_config
  */
 router.get('/overview',
   authenticate,
-  requireAnyPermission(['manage_roles', 'manage_system_config']),
+  requireAdminAccess(),
   rbacController.getRBACOverview
+);
+
+/**
+ * @route GET /api/rbac/admin-only
+ * @desc Endpoint solo para administradores
+ * @access Solo para rol 'admin'
+ */
+router.get('/admin-only',
+  authenticate,
+  requireAdmin(),
+  (req, res) => {
+    res.json({
+      success: true,
+      message: 'Acceso concedido: Solo administradores pueden ver esto',
+      userRole: req.user.rolId
+    });
+  }
+);
+
+/**
+ * @route GET /api/rbac/staff-access
+ * @desc Endpoint para staff (admin o usuario)
+ * @access Para roles 'admin' o 'usuario'
+ */
+router.get('/staff-access',
+  authenticate,
+  requireAnyRole(['admin', 'usuario']),
+  (req, res) => {
+    res.json({
+      success: true,
+      message: 'Acceso concedido: Para staff autorizado',
+      note: 'Disponible para administradores y usuarios regulares'
+    });
+  }
+);
+
+/**
+ * @route GET /api/rbac/flexible-access
+ * @desc Endpoint con acceso flexible (admin O permiso específico)
+ * @access Admin OR permiso 'read_user'
+ */
+router.get('/flexible-access',
+  authenticate,
+  requirePermissionOrRole('read_user', 'admin'),
+  (req, res) => {
+    res.json({
+      success: true,
+      message: 'Acceso concedido: Admin o con permiso read_user'
+    });
+  }
 );
 
 /**

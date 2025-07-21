@@ -79,6 +79,12 @@ const Usuario = sequelize.define('Usuario', {
         allowNull: true,
         field: 'direccion',
         comment: 'Almacena la dirección como un objeto JSON: { street, city, state, zipCode, country }'
+    },
+    rol_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 2,
+        field: 'rol_id',
     }
 }, {
     tableName: 'usuarios',
